@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://macosong.github.io/"/>
-  <updated>2019-12-31T14:19:18.507Z</updated>
+  <updated>2020-01-11T12:55:17.812Z</updated>
   <id>http://macosong.github.io/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>【Spring Cloud】简介</title>
+    <link href="http://macosong.github.io/2020/01/10/%E3%80%90Spring%20Cloud%E3%80%91%E7%AE%80%E4%BB%8B/"/>
+    <id>http://macosong.github.io/2020/01/10/%E3%80%90Spring%20Cloud%E3%80%91%E7%AE%80%E4%BB%8B/</id>
+    <published>2020-01-10T06:39:35.000Z</published>
+    <updated>2020-01-11T12:55:17.812Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;近期计划将个人项目进行微服务化，在比较了两大主流微服务框架：Spring Cloud和Dubbo后，鉴于Spring家族强大的生态与Spring Cloud的迅速发展，最终选择了Spring Cloud作为微服务整治的大框架。工欲善其事，必先利其器，那么我们先来大体了解一下Spring Cloud究竟为何物。&lt;/p&gt;
+    
+    </summary>
+    
+    
+    
+      <category term="spring cloud" scheme="http://macosong.github.io/tags/spring-cloud/"/>
+    
+  </entry>
   
   <entry>
     <title>2019总结与2020计划</title>
