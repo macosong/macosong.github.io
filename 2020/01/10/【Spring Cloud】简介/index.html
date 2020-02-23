@@ -95,8 +95,9 @@
 <meta property="og:description" content="近期计划将个人项目进行微服务化，在比较了两大主流微服务框架：Spring Cloud和Dubbo后，鉴于Spring家族强大的生态与Spring Cloud的迅速发展，最终选择了Spring Cloud作为微服务整治的大框架。工欲善其事，必先利其器，那么我们先来大体了解一下Spring Cloud究竟为何物。">
 <meta property="og:image" content="https:&#x2F;&#x2F;img-blog.csdnimg.cn&#x2F;20190601005532911.png?x-oss-process&#x3D;image&#x2F;watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9mb3JlenAuYmxvZy5jc2RuLm5ldA&#x3D;&#x3D;,size_16,color_FFFFFF,t_70">
 <meta property="og:image" content="https:&#x2F;&#x2F;img-blog.csdnimg.cn&#x2F;20190601005920376.png?x-oss-process&#x3D;image&#x2F;watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9mb3JlenAuYmxvZy5jc2RuLm5ldA&#x3D;&#x3D;,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https:&#x2F;&#x2F;cloud.spring.io&#x2F;spring-cloud-gateway&#x2F;reference&#x2F;html&#x2F;images&#x2F;spring_cloud_gateway_diagram.png">
 <meta property="article:published_time" content="2020-01-10T06:39:35.000Z">
-<meta property="article:modified_time" content="2020-02-20T12:32:47.469Z">
+<meta property="article:modified_time" content="2020-02-22T09:30:26.385Z">
 <meta property="article:author" content="maco">
 <meta property="article:tag" content="spring cloud">
 <meta name="twitter:card" content="summary">
@@ -394,7 +395,8 @@
 <p>Ribbon常见的负载均衡策略有：随机（Random）、轮询（RoundRobin）、一致性哈希（ConsistentHash）、哈希（Hash）、加权（Weighted）。</p>
 <p>其中，RoundRobin是负载均衡器使用的默认负载均衡策略。</p>
 </blockquote>
-<h2 id="断路器——Hystrix"><a href="#断路器——Hystrix" class="headerlink" title="断路器——Hystrix"></a>断路器——Hystrix</h2><p>在微服务架构中，为了保证服务的高可用性，单个服务通常会集群部署。但是可能由于网络或自身原因，这个服务不能保证100%的可用性。一个业务流程往往需要调用多个微服务，假设其中的一个微服务出现问题，那么调用这个服务就会造成线程阻塞，此时若有大量的请求涌入，容器的线程资源将很快就被消耗完，导致服务瘫痪。这必然会影响整个微服务架构，对系统造成严重影响，这就是服务故障的“雪崩”效应。为了解决这个问题，业界提出了断路器模型。</p>
+<h2 id="断路器——Hystrix"><a href="#断路器——Hystrix" class="headerlink" title="断路器——Hystrix"></a>断路器——Hystrix</h2><p>在微服务架构中，为了保证服务的高可用性，单个服务通常会集群部署。但是可能由于网络或自身原因，这个服务不能保证100%的可用性。一个业务流程往往需要调用多个微服务，假设其中的一个微服务出现问题，假设我们有100个线程，那么调用这个服务就会造成线程阻塞，此时在高并发场景下若有大量的请求涌入，容器的线程资源将很快就被消耗完，导致服务瘫痪。这必然会影响整个微服务架构，对系统造成严重影响，这就是服务故障的“雪崩”效应。为了解决这个问题，业界提出了断路器模型——Hystrix，负责服务的隔离、熔断和降级。</p>
+<p>Hystrix会将线程资源按照服务进行隔离，比如100个线程资源，它会分配30个处理对服务A的请求、30个处理对 服务B的请求等等。如果处理A请求的线程都用光了且在一定时间内没有响应，那么Hystrix就认为服务A出现了故障，Hystrix就会调用一个<code>fallback</code>方法，这就是降级，然后将fallback方法的返回值返回，这就是熔断。</p>
 <p>所谓的断路器实际上就是一种错误容忍机制，它是针对客户端的，为客户端微服务添加一个fallback方法，当前微服务出现故障的时候，就会自动调用这个方法，并将结果返回给调用方，这会有效避免故障对整个微服务系统的影响。</p>
 <p>pom文件中引入对应的依赖即可使用。</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-hystrix<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
@@ -412,6 +414,12 @@
 <p>定义一个Feign接口，并声明要调用的服务名。对于每个方法，可以声明要调用的这个服务的具体接口。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FeignClient</span>(value = <span class="string">"service-hi"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">SchedualServiceHi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/hi"</span>, method = RequestMethod.GET)</span><br><span class="line">    <span class="function">String <span class="title">sayHiFromClientOne</span><span class="params">(@RequestParam(value = <span class="string">"name"</span>)</span> String name)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<p>那么Feign为什么能够简化服务的调用呢？我们应该明白，调用服务最终一定通过完整的http请求完成的，也就是说Feign帮助我们完成了构建http请求的任务，不需要我们使用Ribbon一样手动构建。Feign背后的关键机制在于使用了动态代理。</p>
+<ul>
+<li>对于某个添加了@FeignClient注解的接口，Feign就会对这个接口创建一个动态代理</li>
+<li>如果有请求调用这个接口，那么<strong>本质上就是调用这个动态代理</strong></li>
+<li>Feign会根据@RequestMapping的信息在动态代理中构建出完成的请求地址，然后针对这个地址发出请求。</li>
+</ul>
 <h2 id="路由网关——Zuul"><a href="#路由网关——Zuul" class="headerlink" title="路由网关——Zuul"></a>路由网关——Zuul</h2><p>在一个业务功能完整的微服务体系中，存在大量的单一微服务，在高并发的环境下，每个微服务往往都会部署多个实例，这些微服务和实例都具有唯一的URL地址。客户端通过HTTP的方式访问服务，那么在客户端和服务之间必须存在一个统一的出入口，这就是我们一般说的API Gateway（API网关）所扮演的角色。有了API网关，各个API服务提供团队可以专注于自己的业务逻辑处理，而API网关则负责安全、流量、路由等问题。</p>
 <p>而Zuul就是Spring Cloud全家桶中的微服务API网关，所有从设备或网站来的请求都会经过Zuul到达后端的Netflix应用程序，它所实现的功能如下：</p>
 <ul>
@@ -465,6 +473,9 @@
 <h2 id="消息总线——Spring-Cloud-Bus"><a href="#消息总线——Spring-Cloud-Bus" class="headerlink" title="消息总线——Spring Cloud Bus"></a>消息总线——Spring Cloud Bus</h2><p>Spring Cloud Bus将分布式的节点用轻量级的消息代理连接起来。它可以用于广播配置文件的更改或者服务之间的配置，也可以用于监控。比如承接上一节的config，可以使用消息总线实现通知微服务架构的配置文件的更改。</p>
 <p><img src="https://img-blog.csdnimg.cn/20190601005920376.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9mb3JlenAuYmxvZy5jc2RuLm5ldA==,size_16,color_FFFFFF,t_70" alt=""></p>
 <p>比如当git文件更改时，通过POST请求向端口为8882的config client发送<code>/bus/refresh</code>请求，此时8882端口会发送一个消息，由消息总线向其他服务传递，从而使整个微服务集群都达到更新配置文件的目的。</p>
+<h2 id="网关——Spring-Cloud-Gateway"><a href="#网关——Spring-Cloud-Gateway" class="headerlink" title="网关——Spring  Cloud Gateway"></a>网关——Spring  Cloud Gateway</h2><p>Spring Gateway是官方推出的第二代网关，用来取代Netflix Zuul，并且几乎包含了Zuul所有的功能。Spring Cloud Gateway主要有两个重要的组成部分：<strong>predicate</strong>和<strong>filter</strong></p>
+<p><img src="https://cloud.spring.io/spring-cloud-gateway/reference/html/images/spring_cloud_gateway_diagram.png" alt=""></p>
+<p>上面的图来自<a href="https://cloud.spring.io/spring-cloud-gateway/reference/html/" target="_blank" rel="noopener">官网</a>，描述了Gateway的工作机制。<code>Gateway Handler Mapping</code>接收外部请求并匹配一个路由，有点类似Spring MVC的Handler Mapping，这是通过predicate（断言）实现的；把匹配的请求发送给<code>Gateway Web Handler</code>，然后发给一个<code>Filter chain</code>，这些filter可以在代理请求发送之前或响应之前分别发挥作用。</p>
 
       
     </div>
@@ -602,7 +613,7 @@
               
                 <a href="/archives/%7C%7Carchive">
               
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -624,7 +635,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -656,6 +667,12 @@
                         <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
                   </span>
                 
+                  <span class="links-of-author-item">
+                    <a href="https://blog.csdn.net/u011054678" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-book"></i>CSDN</a>
+                  </span>
+                
             </div>
           
 
@@ -680,7 +697,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Cloud概述"><span class="nav-text">Spring Cloud概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务注册与发现——Eureka"><span class="nav-text">服务注册与发现——Eureka</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Eureka-Server"><span class="nav-text">Eureka Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Eureka-Client"><span class="nav-text">Eureka Client</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#负载均衡客户端——Ribbon"><span class="nav-text">负载均衡客户端——Ribbon</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#断路器——Hystrix"><span class="nav-text">断路器——Hystrix</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP客户端——Feign"><span class="nav-text">HTTP客户端——Feign</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由网关——Zuul"><span class="nav-text">路由网关——Zuul</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Zuul的路由功能"><span class="nav-text">Zuul的路由功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Zuul的过滤功能"><span class="nav-text">Zuul的过滤功能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式配置中心——Spring-Cloud-Config"><span class="nav-text">分布式配置中心——Spring Cloud Config</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息总线——Spring-Cloud-Bus"><span class="nav-text">消息总线——Spring Cloud Bus</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Cloud概述"><span class="nav-text">Spring Cloud概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务注册与发现——Eureka"><span class="nav-text">服务注册与发现——Eureka</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Eureka-Server"><span class="nav-text">Eureka Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Eureka-Client"><span class="nav-text">Eureka Client</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#负载均衡客户端——Ribbon"><span class="nav-text">负载均衡客户端——Ribbon</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#断路器——Hystrix"><span class="nav-text">断路器——Hystrix</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP客户端——Feign"><span class="nav-text">HTTP客户端——Feign</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由网关——Zuul"><span class="nav-text">路由网关——Zuul</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Zuul的路由功能"><span class="nav-text">Zuul的路由功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Zuul的过滤功能"><span class="nav-text">Zuul的过滤功能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分布式配置中心——Spring-Cloud-Config"><span class="nav-text">分布式配置中心——Spring Cloud Config</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息总线——Spring-Cloud-Bus"><span class="nav-text">消息总线——Spring Cloud Bus</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#网关——Spring-Cloud-Gateway"><span class="nav-text">网关——Spring  Cloud Gateway</span></a></li></ol></div>
             
 
           </div>
